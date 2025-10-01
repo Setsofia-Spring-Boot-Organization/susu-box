@@ -1,5 +1,6 @@
 package com.backend.susu_box.core.security;
 
+import com.backend.susu_box.core.user.UserEntity;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -28,10 +29,11 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String email) {
+    public String generateToken(UserEntity user) {
         return Jwts
                 .builder()
-                .setSubject(email)
+                .setId(user.getId())
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + jstTokenExpirationInMS))
                 .signWith(key, SignatureAlgorithm.HS256)
