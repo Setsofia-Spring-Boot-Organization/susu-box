@@ -38,6 +38,9 @@ public class AuthServiceImpl implements AuthService{
     @Override
     public ResponseEntity<Response<?>> signUpUser(UserSignupDto signUpDto, boolean isAdmin) {
 
+        //Todo: Check user email and contact does not exist
+        //Todo: Check required fields valid
+
         UserEntity user = UserEntity
                 .builder()
                 .fullName(signUpDto.fullName())
