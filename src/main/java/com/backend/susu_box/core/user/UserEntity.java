@@ -1,23 +1,37 @@
 package com.backend.susu_box.core.user;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString
+@Entity
+@Builder
+@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@Entity
-@Table(name = "users")
 public class UserEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    private String fullName;
     private String email;
     private String password;
+
+    private String momoNumber;
+    private String momoChannel;
+
+    private LocalDateTime dateCreated;
+    private LocalDateTime dateUpdated;
+
+    private UserRole role;
+
+    public enum UserRole {
+        CONTRIBUTOR,
+        BOX_ADMIN
+    }
 }

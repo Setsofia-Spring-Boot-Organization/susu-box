@@ -2,10 +2,7 @@ package com.backend.susu_box.core.auth;
 
 import com.backend.susu_box.core.dao.Response;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/auth")
@@ -17,10 +14,20 @@ public class AuthController {
         this.authService = authService;
     }
 
+    //Todo: complete the signup with input validations
     @PostMapping(path = "/sign-up")
     public ResponseEntity<Response<?>> signUpUser(
-            @RequestBody UserSignupDto signUpDto
+            @RequestBody UserSignupDto signUpDto,
+            @RequestParam(required = false) boolean is_admin
     ) {
-        return authService.signUpUser(signUpDto);
+        return authService.signUpUser(signUpDto, is_admin);
+    }
+
+
+    @PostMapping(path = "/sign-in")
+    public ResponseEntity<Response<?>> getUsers(
+            @RequestBody UserSignInDto userSignInDto
+    ) {
+        return authService.signInUser(userSignInDto);
     }
 }
