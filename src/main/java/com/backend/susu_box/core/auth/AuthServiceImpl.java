@@ -1,6 +1,8 @@
 package com.backend.susu_box.core.auth;
 
 import com.backend.susu_box.core.dao.Response;
+import com.backend.susu_box.core.exception.SusuBoxException;
+import com.backend.susu_box.core.exception.SusuBoxExceptionMessages;
 import com.backend.susu_box.core.security.JwtUtil;
 import com.backend.susu_box.core.user.UserEntity;
 import com.backend.susu_box.core.user.UserRepository;
@@ -15,8 +17,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -26,41 +30,50 @@ public class AuthServiceImpl implements AuthService{
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final AuthUtil authUtil;
 
-    public AuthServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, AuthUtil authUtil) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.authUtil = authUtil;
     }
 
-
+    @Transactional(rollbackFor = {Exception.class})
     @Override
     public ResponseEntity<Response<?>> signUpUser(UserSignupDto signUpDto, boolean isAdmin) {
 
-        //Todo: Check user email and contact does not exist
-        //Todo: Check required fields valid
+        if (authUtil.isExistingEmail(signUpDto.email())) throw new SusuBoxException(SusuBoxExceptionMessages.EMAIL_ALREADY_EXISTS);
 
-        UserEntity user = UserEntity
-                .builder()
-                .fullName(signUpDto.fullName())
-                .email(signUpDto.email())
-                .password(passwordEncoder.encode(signUpDto.password()))
-                .momoNumber(signUpDto.momoNumber())
-                .momoChannel(signUpDto.momoChannel())
-                .dateCreated(LocalDateTime.now())
-                .dateUpdated(LocalDateTime.now())
-                .role(isAdmin ? UserEntity.UserRole.BOX_ADMIN : UserEntity.UserRole.CONTRIBUTOR)
-                .build();
+        if (!authUtil.isValidFields(signUpDto)) throw new SusuBoxException(SusuBoxExceptionMessages.NO_EMPTY_FIELD_ALLOWED);
 
-        UserEntity newUser = userRepository.saveAndFlush(user);
+        try {
+            UserEntity user = UserEntity
+                    .builder()
+                    .firstName(signUpDto.firstName())
+                    .lastName(signUpDto.lastName())
+                    .email(signUpDto.email().toLowerCase())
+                    .password(passwordEncoder.encode(signUpDto.password()))
+                    .momoNumber(signUpDto.momoNumber())
+                    .momoChannel(signUpDto.momoChannel())
+                    .dateCreated(LocalDateTime.now())
+                    .dateUpdated(LocalDateTime.now())
+                    .role(isAdmin ? UserEntity.UserRole.BOX_ADMIN : UserEntity.UserRole.CONTRIBUTOR)
+                    .build();
 
-        return ResponseEntity.ok(
-                Response.builder()
-                        .message("New user created!")
-                        .data(newUser)
-                        .build()
-        );
+            UserEntity newUser = userRepository.saveAndFlush(user);
+
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .message("New user created!")
+                            .data(Map.of("id", newUser.getId()))
+                            .build()
+            );
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new SusuBoxException(SusuBoxExceptionMessages.ERROR_CREATING_USER);
+        }
     }
 
 
@@ -71,7 +84,7 @@ public class AuthServiceImpl implements AuthService{
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            userSignInDto.email(),
+                            userSignInDto.email().toLowerCase(),
                             userSignInDto.password()
                     )
             );
@@ -86,19 +99,13 @@ public class AuthServiceImpl implements AuthService{
             return ResponseEntity.ok(
                     Response.builder()
                             .message("Login successful")
-                            .data(token)
+                            .data(Map.of("token", token))
                             .build()
             );
 
         } catch (AuthenticationException authenticationException) {
-
             log.error(authenticationException.getMessage());
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    Response.builder()
-                            .message("Bad credentials")
-                            .build()
-            );
+            throw new SusuBoxException(SusuBoxExceptionMessages.BAD_CREDENTIALS);
         }
     }
 }
