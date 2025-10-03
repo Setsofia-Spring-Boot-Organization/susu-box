@@ -1,6 +1,6 @@
 package com.backend.susu_box.core.security;
 
-import com.backend.susu_box.core.user.CustomUserDetailsService;
+import com.backend.susu_box.core.users.user.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

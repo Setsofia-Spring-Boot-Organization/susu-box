@@ -21,7 +21,11 @@ public class GlobalExceptionHandler {
             case EMAIL_ALREADY_EXISTS,
                  NO_EMPTY_FIELD_ALLOWED -> status = HttpStatus.BAD_REQUEST;
             case ERROR_CREATING_USER,
-                 BAD_CREDENTIALS -> status = HttpStatus.CONFLICT;
+                 BAD_CREDENTIALS,
+                 UPDATE_UNSUCCESSFUL -> status = HttpStatus.CONFLICT;
+            case USER_NOT_FOUND,
+                 NOT_FOUND -> status = HttpStatus.NOT_FOUND;
+            case UNAUTHORIZED_USER -> status = HttpStatus.UNAUTHORIZED;
         }
 
         return ResponseEntity

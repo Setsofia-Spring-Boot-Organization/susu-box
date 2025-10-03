@@ -1,4 +1,4 @@
-package com.backend.susu_box.core.user;
+package com.backend.susu_box.core.users.user;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +29,7 @@ public class UserEntity {
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
 
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
     public enum UserRole {

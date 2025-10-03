@@ -4,17 +4,17 @@ import com.backend.susu_box.core.dao.Response;
 import com.backend.susu_box.core.exception.SusuBoxException;
 import com.backend.susu_box.core.exception.SusuBoxExceptionMessages;
 import com.backend.susu_box.core.security.JwtUtil;
-import com.backend.susu_box.core.user.UserEntity;
-import com.backend.susu_box.core.user.UserRepository;
+import com.backend.susu_box.core.users.user.UserEntity;
+import com.backend.susu_box.core.users.user.UserRepository;
+import com.backend.susu_box.core.users.user.UserUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +24,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService{
 
     private final PasswordEncoder passwordEncoder;
@@ -31,14 +32,7 @@ public class AuthServiceImpl implements AuthService{
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final AuthUtil authUtil;
-
-    public AuthServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, AuthUtil authUtil) {
-        this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-        this.authUtil = authUtil;
-    }
+    private final UserUtil userUtil;
 
     @Transactional(rollbackFor = {Exception.class})
     @Override
@@ -64,10 +58,12 @@ public class AuthServiceImpl implements AuthService{
 
             UserEntity newUser = userRepository.saveAndFlush(user);
 
+            String token = jwtUtil.generateToken(newUser);
+
             return ResponseEntity.ok(
                     Response.builder()
                             .message("New user created!")
-                            .data(Map.of("id", newUser.getId()))
+                            .data(Map.of("token", token))
                             .build()
             );
         } catch (Exception exception) {
@@ -81,7 +77,6 @@ public class AuthServiceImpl implements AuthService{
     public ResponseEntity<Response<?>> signInUser(UserSignInDto userSignInDto) {
 
         try {
-
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             userSignInDto.email().toLowerCase(),
@@ -91,8 +86,7 @@ public class AuthServiceImpl implements AuthService{
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            UserEntity user = userRepository.findByEmail(userSignInDto.email())
-                    .orElseThrow(() -> new  UsernameNotFoundException("User with email " + userSignInDto.email() + " not found"));
+            UserEntity user = userUtil.getUserByEmail(userSignInDto.email());
 
             String token = jwtUtil.generateToken(user);
 

@@ -1,4 +1,4 @@
-package com.backend.susu_box.core.user;
+package com.backend.susu_box.core.users.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

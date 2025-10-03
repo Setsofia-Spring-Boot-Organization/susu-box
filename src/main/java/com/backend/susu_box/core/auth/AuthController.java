@@ -14,7 +14,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    //Todo: complete the signup with input validations
     @PostMapping(path = "/sign-up")
     public ResponseEntity<Response<?>> signUpUser(
             @RequestBody UserSignupDto signUpDto,

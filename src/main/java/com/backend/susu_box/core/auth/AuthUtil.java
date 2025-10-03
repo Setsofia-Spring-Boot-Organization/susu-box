@@ -1,6 +1,6 @@
 package com.backend.susu_box.core.auth;
 
-import com.backend.susu_box.core.user.UserRepository;
+import com.backend.susu_box.core.users.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,6 @@ public class AuthUtil {
     }
 
     public boolean isValidFields(UserSignupDto signupDto) {
-
         return !signupDto.firstName().trim().isEmpty() &&
                 !signupDto.lastName().trim().isEmpty() &&
                 !signupDto.email().trim().isEmpty() &&

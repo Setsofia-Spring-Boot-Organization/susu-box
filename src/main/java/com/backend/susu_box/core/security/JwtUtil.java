@@ -1,6 +1,6 @@
 package com.backend.susu_box.core.security;
 
-import com.backend.susu_box.core.user.UserEntity;
+import com.backend.susu_box.core.users.user.UserEntity;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -44,14 +44,14 @@ public class JwtUtil {
         return Jwts
                 .parserBuilder()
                 .setSigningKey(key).build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
     }
 
     public boolean isValidJwtToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJwt(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (SecurityException e) {
             System.out.println("Invalid JWT signature: " + e.getMessage());
