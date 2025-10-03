@@ -15,8 +15,8 @@ public class BoxController {
 
 
     @GetMapping(path = "/{box-id}")
-    public ResponseEntity<Response<BoxDataDao>> getBoxData(@PathVariable("box-id") String boxId, @RequestParam String memberId) {
-        return boxService.getBoxData(boxId, memberId);
+    public ResponseEntity<Response<BoxDataDao>> getBoxDataByMember(@PathVariable("box-id") String boxId, @RequestParam String memberId) {
+        return boxService.getBoxDataByMember(boxId, memberId);
     }
 
     @PostMapping(path = "/new/{box-admin-id}")

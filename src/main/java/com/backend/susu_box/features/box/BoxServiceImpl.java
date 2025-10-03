@@ -18,7 +18,7 @@ public class BoxServiceImpl implements BoxService{
     private final UserUtil userUtil;
 
     @Override
-    public ResponseEntity<Response<BoxDataDao>> getBoxData(String boxId, String memberId) {
+    public ResponseEntity<Response<BoxDataDao>> getBoxDataByMember(String boxId, String memberId) {
 
         BoxEntity box = boxUtil.getBoxById(boxId);
 

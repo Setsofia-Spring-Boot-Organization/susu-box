@@ -8,5 +8,5 @@ public interface BoxService {
 
     ResponseEntity<Response<BoxDataDao>> createBox(String boxAdminId, NewBoxDto boxDto);
 
-    ResponseEntity<Response<BoxDataDao>> getBoxData(String boxId, String memberId);
+    ResponseEntity<Response<BoxDataDao>> getBoxDataByMember(String boxId, String memberId);
 }
